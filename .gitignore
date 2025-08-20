@@ -1,0 +1,50 @@
+nats_data/
+
+# =========================================
+# Android / WearOS Kotlin project
+# =========================================
+*.iml
+.gradle/
+build/
+captures/
+local.properties
+.DS_Store
+.idea
+*.apk
+*.ap_
+*.aab
+*.hprof
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (WearOS app)
+app/google-services.json
+
+# NDK / CMake
+.externalNativeBuild
+.cxx/
+
+# JetBrains IDE
+.idea/*
+*.ipr
+*.iws
+
+# =========================================
+# General
+# =========================================
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# OS generated
+*.swp
+*.tmp
+*.temp
+*.lock
+Thumbs.db
+ehthumbs.db
+.DS_Store
