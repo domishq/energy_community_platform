@@ -1,7 +1,6 @@
 # Energy Community Smartwatch Prototype
 
-<img width="469" height="977" alt="image" src="https://github.com/user-attachments/assets/6376ffaa-8da7-4e97-a866-0d9c777a48e1" /> <img width="462" height="437" alt="image" src="https://github.com/user-attachments/assets/f9954c53-61cd-4640-9b3a-3f02b2b77aeb" />
-
+<img width="437" height="437" alt="image" src="https://github.com/user-attachments/assets/f9954c53-61cd-4640-9b3a-3f02b2b77aeb" /> <img width="235" height="489" alt="image" src="https://github.com/user-attachments/assets/6376ffaa-8da7-4e97-a866-0d9c777a48e1" />
 
 This project explores the concept of **energy communities** through a minimal, energy-efficient smartwatch application. It demonstrates how complex energy infrastructure and data pipelines can be visualized and interacted with via a simple wearable interface.
 
