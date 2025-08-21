@@ -1,4 +1,4 @@
-package com.example.smartwatchandroidapp.presentation.theme
+package com.example.energy.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme

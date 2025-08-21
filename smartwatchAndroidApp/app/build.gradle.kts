@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smartwatchandroidapp"
+    namespace = "com.example.energy"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.smartwatchandroidapp"
+        applicationId = "com.example.energy"
         minSdk = 30
         targetSdk = 35
         versionCode = 1

@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           netData = netEnergy;
           isLoading = false;
         });
-        WearOSService.sendNetEnergy(netEnergy);
+        WearOSService.sendNetEnergy("${data["genW"] - data["conW"]}");
       } else {
         setState(() {
           netData = "N/A";
@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
             setState(() {
               netData = netEnergy;
             });
-            WearOSService.sendNetEnergy(netEnergy);
+            WearOSService.sendNetEnergy("${data["genW"] - data["conW"]}");
           }
         });
   }

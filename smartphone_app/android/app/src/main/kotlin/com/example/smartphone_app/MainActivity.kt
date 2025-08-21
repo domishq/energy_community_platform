@@ -1,4 +1,4 @@
-package com.example.smartphone_app
+package com.example.energy
 
 import android.os.Bundle
 import android.util.Log
@@ -45,9 +45,9 @@ class MainActivity: FlutterActivity() {
         lifecycleScope.launch {
             try {
                 val result = dataClient.putDataItem(request).await()
-                Log.d("FlutterBridge", "Sent to watch: $result")
+                Log.d("FlutterBridge", "Sent to watch($value): $result")
             } catch (e: Exception) {
-                Log.e("FlutterBridge", "Failed to send", e)
+                Log.e("FlutterBridge", "Failed to send($value)", e)
             }
         }
     }

@@ -14,7 +14,14 @@
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
-
+        <service
+            android:name=".presentation.WearDataListenerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
                app to run.
