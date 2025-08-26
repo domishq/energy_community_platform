@@ -25,6 +25,8 @@ services:
     depends_on:
       - nats
       - redis
+    volumes:
+      - ./aggregator:/app
     restart: unless-stopped
 
   api:

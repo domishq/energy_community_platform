@@ -12,6 +12,7 @@ class CommunityData(BaseModel):
     communityId: str
     genW: int
     conW: int
+    measuredAt: str
 
 @app.on_event("startup")
 async def startup_event():
@@ -34,10 +35,21 @@ async def get_latest(community_id:str):
 
     data = app.state.redis.get(f"ec:{community_id}:latest")
 
-    if not data:
-        raise HTTPException(status_code=404, detail="No data available")
+    if data:
+       return json.loads(data)
     
-    return json.loads(data)
+    try:
+        kv = await app.state.js.key_value("ec_latest")
+        entry = await kv.get(f"community/{community_id}")
+
+        if entry is not None:
+            value = entry.value.decode()
+            app.state.redis.set(f"ec:{community_id}:latest", value, ex=300)
+            return json.loads(value)
+    except Exception as e:
+        raise HTTPException(status_code=500, details=f"KV store error {str(e)}")
+    
+    return HTTPException(status_code=404, detail="No data for this community")
 
 @app.post("/communities/")
 async def post_data(payload: CommunityData):

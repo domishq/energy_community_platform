@@ -81,7 +81,6 @@ fun EnergyScreen(value: Int) {
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background)
         ) {
-            TimeText(modifier = Modifier.align(Alignment.TopCenter).padding(12.dp))
             CircularValueIndicator(value = value, maxValue = 10000)
         }
     }

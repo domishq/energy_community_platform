@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">energy</string>
+    <string name="app_name">Nexa</string>
     <string name="data_item_changed">Data Item Changed</string>
     <string name="data_item_deleted">Data Item Deleted</string>
     <string name="data_item_unknown">Data Item Unknown</string>

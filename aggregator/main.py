@@ -36,14 +36,18 @@ async def main():
         cid = data["communityId"]
         genW = data["genW"]
         conW = data["conW"]
+        measuredAt = data["measuredAt"]
 
         store_data = {
             "genW": genW,
-            "conW": conW
+            "conW": conW,
+            "measuredAt": measuredAt
         }
 
+        print(store_data)
+
         # Write to Redis
-        r.set(f"ec:{cid}:latest", json.dumps(store_data), ex=300)  # expires in 5m
+        r.set(f"ec:{cid}:latest", json.dumps(store_data), ex=60)  # expires in 5m
 
         # Write to NATS KV
         await kv.put(f"community/{cid}", json.dumps(store_data).encode())
