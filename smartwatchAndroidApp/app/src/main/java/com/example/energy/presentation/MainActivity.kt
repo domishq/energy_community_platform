@@ -128,6 +128,15 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(netEnergyReceiver, IntentFilter(WearDataListenerService.ACTION_NET_ENERGY))
+
+        // Re-run the same logic you do on first launch
+        val repo = EnergyRepository(this)
+        val cached = repo.getCachedValue()
+        if (cached != null && repo.isCacheValid(cached.second)) {
+            netEnergy.value = cached.first
+        } else {
+            requestLatestFromPhone()
+        }
     }
 
     override fun onPause() {
