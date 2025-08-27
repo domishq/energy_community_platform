@@ -24,9 +24,15 @@ class WearDataListenerService : WearableListenerService() {
 
                 val dataMap = DataMapItem.fromDataItem(event.dataItem).dataMap
                 val value = dataMap.getInt("netEnergy", 0)
-                Log.d(TAG, "Received netEnergy=$value")
+                val measuredAt = dataMap.getLong("measuredAt", System.currentTimeMillis())
 
-                // Broadcast value to MainActivity
+                Log.d(TAG, "Received netEnergy=$value measuredAt=$measuredAt")
+
+                // cache locally
+                val repo = EnergyRepository(this)
+                repo.saveValue(value, measuredAt)
+
+                // broadcast to MainActivity
                 val intent = Intent(ACTION_NET_ENERGY)
                 intent.putExtra(EXTRA_NET_ENERGY, value)
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent)

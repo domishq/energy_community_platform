@@ -7,7 +7,11 @@ class WearOSService {
 
   static Future<void> sendNetEnergy(String netEnergy) async {
     try {
-      await _channel.invokeMethod('sendNetEnergy', {'netEnergy': netEnergy});
+      final measuredAt = DateTime.now().millisecondsSinceEpoch;
+      await _channel.invokeMethod('sendNetEnergy', {
+        'netEnergy': netEnergy,
+        'measuredAt': measuredAt,
+      });
     } on PlatformException catch (e) {
       print("Failed to send to Wear OS: ${e.message}");
     }

@@ -10,6 +10,7 @@ import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.PutDataMapRequest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.example.energy.SendToWatchHelper
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.example.energy/wearos"
@@ -20,34 +21,15 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "sendNetEnergy") {
                 val netEnergyStr = call.argument<String>("netEnergy") ?: "0"
+                val measuredAt = call.argument<Long>("measuredAt") ?: System.currentTimeMillis()
                 try {
-                    // handle decimals safely
                     val netEnergy = netEnergyStr.toDouble().toInt()
-                    sendNetEnergyToWatch(netEnergy)
+                    SendToWatchHelper.sendNetEnergy(this, netEnergy, measuredAt)
                     result.success(null)
                 } catch (e: Exception) {
                     Log.e("FlutterBridge", "Failed to parse netEnergy: $netEnergyStr", e)
                     result.error("PARSE_ERROR", "Invalid netEnergy format: $netEnergyStr", null)
                 }
-            } else {
-                result.notImplemented()
-            }
-        }
-    }
-
-    private fun sendNetEnergyToWatch(value: Int) {
-        val dataClient = Wearable.getDataClient(this)
-        val request = PutDataMapRequest.create("/net_energy").apply {
-            dataMap.putInt("netEnergy", value)
-            dataMap.putLong("time", System.currentTimeMillis()) // ensures update
-        }.asPutDataRequest().setUrgent()
-
-        lifecycleScope.launch {
-            try {
-                val result = dataClient.putDataItem(request).await()
-                Log.d("FlutterBridge", "Sent to watch($value): $result")
-            } catch (e: Exception) {
-                Log.e("FlutterBridge", "Failed to send($value)", e)
             }
         }
     }

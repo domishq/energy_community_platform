@@ -1,0 +1,3 @@
+-reduced TTL on community data reading insert from 300s to 60s
+-implemented cache hit/miss on reading get api
+-implemented measuredAt on data reading

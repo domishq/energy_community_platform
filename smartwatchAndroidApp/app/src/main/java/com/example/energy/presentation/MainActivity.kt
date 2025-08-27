@@ -8,31 +8,62 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.wear.compose.material.CircularProgressIndicator
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
-import androidx.compose.foundation.background
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
-import com.google.android.gms.wearable.*
-import com.example.energy.presentation.theme.SmartwatchAndroidAppTheme
-import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Text
+import com.example.energy.presentation.theme.SmartwatchAndroidAppTheme
+import com.google.android.gms.wearable.Wearable
+import java.time.Instant
+
+// ---------------- EnergyRepository (cache helper) ----------------
+
+class EnergyRepository(val context: Context) {
+    private val prefs = context.getSharedPreferences("energy_cache", Context.MODE_PRIVATE)
+
+    companion object {
+        const val MAX_CACHE_MINUTES = 1L
+    }
+
+    fun getCachedValue(): Pair<Int, Long>? {
+        val value = prefs.getInt("latest_energy", -1)
+        val measuredAt = prefs.getLong("latest_measured_at", 0L)
+        return if (value != -1) Pair(value, measuredAt) else null
+    }
+
+    fun saveValue(value: Int, measuredAt: Long) {
+        prefs.edit()
+            .putInt("latest_energy", value)
+            .putLong("latest_measured_at", measuredAt)
+            .apply()
+    }
+
+    fun isCacheValid(measuredAt: Long): Boolean {
+        val now = Instant.now().toEpochMilli()
+        val ageMillis = now - measuredAt
+        val maxMillis = MAX_CACHE_MINUTES * 60 * 1000
+        return ageMillis <= maxMillis
+    }
+}
+
+// ---------------- MainActivity ----------------
 
 class MainActivity : ComponentActivity() {
 
@@ -50,6 +81,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // try to load cache first
+        val repo = EnergyRepository(this)
+        val cached = repo.getCachedValue()
+        if (cached != null && repo.isCacheValid(cached.second)) {
+            netEnergy.value = cached.first
+        } else {
+            // no cache → still display 0 but request from phone
+            requestLatestFromPhone()
+        }
+
         setContent {
             MaterialTheme {
                 Scaffold {
@@ -59,19 +100,42 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestLatestFromPhone() {
+        // Ask NodeClient for all connected nodes (usually just the paired phone)
+        Wearable.getNodeClient(this).connectedNodes
+            .addOnSuccessListener { nodes ->
+                if (nodes.isEmpty()) {
+                    Log.w("MainActivity", "No connected phone found")
+                    return@addOnSuccessListener
+                }
+
+                val phoneNode = nodes.first()
+                Wearable.getMessageClient(this)
+                    .sendMessage(phoneNode.id, "/request_latest_energy", null)
+                    .addOnSuccessListener {
+                        Log.d("MainActivity", "Requested latest energy from ${phoneNode.displayName}")
+                    }
+                    .addOnFailureListener { error ->
+                        Log.e("MainActivity", "Failed to request energy: ${error.message}", error)
+                    }
+            }
+            .addOnFailureListener { error ->
+                Log.e("MainActivity", "Error discovering phone node: ${error.message}", error)
+            }
+    }
+
     override fun onResume() {
         super.onResume()
-        // Register BroadcastReceiver
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(netEnergyReceiver, IntentFilter(WearDataListenerService.ACTION_NET_ENERGY))
     }
 
     override fun onPause() {
         super.onPause()
-        // Unregister BroadcastReceiver
         LocalBroadcastManager.getInstance(this).unregisterReceiver(netEnergyReceiver)
     }
 }
+
 
 @Composable
 fun EnergyScreen(value: Int) {
@@ -79,7 +143,8 @@ fun EnergyScreen(value: Int) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background)
+                .background(MaterialTheme.colors.background),
+            contentAlignment = Alignment.Center
         ) {
             CircularValueIndicator(value = value, maxValue = 10000)
         }
@@ -139,4 +204,3 @@ fun CircularValueIndicator(value: Int, maxValue: Int) {
         }
     }
 }
-
